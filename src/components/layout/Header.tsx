@@ -56,7 +56,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
         <div className="flex items-center gap-3">
           <h1 className="text-[15px] font-semibold tracking-tight text-ws-black leading-none">
-            Triagent
+            TriAgent
           </h1>
           <span className="hidden md:inline eyebrow leading-none">
             prototype · simulated data

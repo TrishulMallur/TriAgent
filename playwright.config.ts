@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright config for Triagent E2E tests.
+ * Playwright config for TriAgent E2E tests.
  *
  * The mock provider injects 800-2000ms of artificial latency per AI call,
  * so per-test timeouts and per-expect timeouts are deliberately generous.

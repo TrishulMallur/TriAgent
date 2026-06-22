@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Triagent editorial palette — OKLCH-tuned, warm-tinted neutrals.
+        // TriAgent editorial palette — OKLCH-tuned, warm-tinted neutrals.
         // Token names retained (ws-*) so the rest of the app inherits the
         // upgrade without a 46-file rename. The values are the design.
         ws: {

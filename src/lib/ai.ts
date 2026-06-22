@@ -330,7 +330,7 @@ Flag vague statements like "discussed risk" as insufficient · CIRO requires SPE
 Honour the ACTIVE RULES block above · items listed under "Do NOT flag" should NOT appear in checklist failures or flags.
 Return ONLY the JSON object, no other text.`;
 
-const TRANSFER_VALIDATION_SYSTEM_PROMPT_BODY = `You are a transfer document validation system for Triagent, a Canadian financial platform. You validate inbound account transfer documents against ATON/ACATS rules.
+const TRANSFER_VALIDATION_SYSTEM_PROMPT_BODY = `You are a transfer document validation system for TriAgent, a Canadian financial platform. You validate inbound account transfer documents against ATON/ACATS rules.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -377,7 +377,7 @@ Default validation rules (subject to the ACTIVE RULES block above):
 If a rule is listed under "Do NOT flag" in the ACTIVE RULES block, do not fail or warn against it · downgrade to pass.
 Return ONLY the JSON object, no other text.`;
 
-const DOCUMENT_EXTRACTION_SYSTEM_PROMPT = `You are a document extraction system for Triagent. You read unstructured transfer documents from legacy banks and extract all fields into a structured format.
+const DOCUMENT_EXTRACTION_SYSTEM_PROMPT = `You are a document extraction system for TriAgent. You read unstructured transfer documents from legacy banks and extract all fields into a structured format.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -416,9 +416,9 @@ Fields to extract (in order):
 If a field cannot be found, return value as null with low confidence and explain why.
 Return ONLY the JSON object, no other text.`;
 
-const EXCEPTION_DIAGNOSIS_SYSTEM_PROMPT = `You are an account transfer exception resolution system for Triagent. When a transfer is rejected by the losing institution, you diagnose the root cause and draft a client communication.
+const EXCEPTION_DIAGNOSIS_SYSTEM_PROMPT = `You are an account transfer exception resolution system for TriAgent. When a transfer is rejected by the losing institution, you diagnose the root cause and draft a client communication.
 
-You will receive: the rejection code and reason, the client's Triagent profile, and the original transfer details.
+You will receive: the rejection code and reason, the client's TriAgent profile, and the original transfer details.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -438,10 +438,10 @@ You MUST return a valid JSON object with this exact structure:
 Guidelines:
 - Use the client's first name in the email
 - Be specific about what the client needs to do
-- Keep the email warm, clear, and action-oriented · this is Triagent's brand voice
+- Keep the email warm, clear, and action-oriented · this is TriAgent's brand voice
 - If the diagnosis is uncertain, set requiresManualReview to true
 - Never instruct the client to do something impossible or incorrect
-- For fee issues, mention Triagent's transfer fee reimbursement program
+- For fee issues, mention TriAgent's transfer fee reimbursement program
 
 Return ONLY the JSON object, no other text.`;
 

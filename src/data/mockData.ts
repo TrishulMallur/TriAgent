@@ -1,5 +1,5 @@
 /**
- * MOCK DATA · Simulated Triagent operational data
+ * MOCK DATA · Simulated TriAgent operational data
  * 
  * This file contains all mock data for the prototype.
  * No real PII is used. All names, account numbers, and institutions are fictional.
@@ -165,12 +165,12 @@ TRANSFER DETAILS
 Transfer Type: Full Transfer
 Asset Type: Cash
 Estimated Value: $28,000.00
-Transfer To: Triagent
+Transfer To: TriAgent
 Destination Account: WS-9912034
 Destination Account Type: TFSA
 
 AUTHORIZATION
-I hereby authorize TD Canada Trust to transfer the above-referenced account to Triagent
+I hereby authorize TD Canada Trust to transfer the above-referenced account to TriAgent
 
 Signature: [SIGNED] Sarah Martinez
 Date: February 15, 2026
@@ -188,7 +188,7 @@ Type: LIRA
 Branch: 00312
 
 To:
-Triagent - WS-4456789
+TriAgent - WS-4456789
 Type: Non-Registered  (Note: LIRA cannot go to Non-Registered)
 
 Transfer: Full, In-Kind
@@ -212,7 +212,7 @@ Account Type: FHSA
 Estimated Value: $8,000
 
 Destination:
-Triagent
+TriAgent
 Account #: WS-6623451
 Account Type: FHSA
 
@@ -245,13 +245,13 @@ Risk Tolerance:
 Sarah confirmed her risk tolerance as moderate-to-aggressive (7/10 on our scale). She expressed comfort with short-term volatility and understands that equity-heavy portfolios can experience drawdowns of 20-30% in any given year. She confirmed she would not panic sell in a downturn.
 
 Recommendation & Suitability Rationale:
-I recommended rebalancing from her current 60/40 equity-bond split to a 75/25 split, using Triagent's Growth portfolio. This aligns with her moderate-to-aggressive risk profile, her 7-10 year time horizon, and her stated growth objective. At 35 with stable employment and no debt pressure, she has the capacity to absorb short-term volatility.
+I recommended rebalancing from her current 60/40 equity-bond split to a 75/25 split, using TriAgent's Growth portfolio. This aligns with her moderate-to-aggressive risk profile, her 7-10 year time horizon, and her stated growth objective. At 35 with stable employment and no debt pressure, she has the capacity to absorb short-term volatility.
 
 Material Risks Discussed:
 I informed Sarah that increasing equity exposure means higher expected volatility. Specifically, a 75% equity portfolio could see drawdowns of 25-35% in a severe downturn. I also noted that her 7-10 year time horizon for the home upgrade provides adequate recovery time, but if her timeline shortened materially, we would need to reassess.
 
 Client Response:
-Sarah agreed with the recommendation and confirmed she is comfortable with the increased equity allocation. She had no objections. She asked about ESG options, and I noted that Triagent's SRI portfolio is available if she wants to prioritize socially responsible investing in the future.
+Sarah agreed with the recommendation and confirmed she is comfortable with the increased equity allocation. She had no objections. She asked about ESG options, and I noted that TriAgent's SRI portfolio is available if she wants to prioritize socially responsible investing in the future.
 
 No conflicts of interest to disclose.`,
 

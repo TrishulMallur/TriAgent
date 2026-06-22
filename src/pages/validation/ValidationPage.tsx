@@ -65,7 +65,7 @@ export function ValidationPage() {
         .join('\n') +
       `\n\nPlease provide corrected documentation addressing the above issues at your earliest convenience.\n\n` +
       `If you have any questions, please do not hesitate to contact our Transfer Operations team.\n\n` +
-      `Best regards,\nTriagent Transfer Operations`
+      `Best regards,\nTriAgent Transfer Operations`
     );
     setShowFollowUp(true);
   }, []);

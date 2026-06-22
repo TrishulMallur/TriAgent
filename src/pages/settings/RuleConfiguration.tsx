@@ -13,7 +13,7 @@ interface SlaWindowMeta {
 const SLA_WINDOW_META: SlaWindowMeta[] = [
   { id: 'name_mismatch', label: 'Name Mismatch', description: 'SLA window for name-mismatch rejections (most common, usually quick to resolve)' },
   { id: 'insufficient_fee', label: 'Insufficient Fee', description: 'Insufficient transfer-out fee · client communication tends to be fast' },
-  { id: 'account_type_conflict', label: 'Account Type Conflict', description: 'LIRA/RRIF/locked-in conflicts may need a Triagent ops review' },
+  { id: 'account_type_conflict', label: 'Account Type Conflict', description: 'LIRA/RRIF/locked-in conflicts may need a TriAgent ops review' },
   { id: 'missing_signature', label: 'Missing Signature', description: 'Client must re-sign · short SLA forces a same-day response' },
   { id: 'expired_authorization', label: 'Expired Authorization', description: 'Authorization older than the 90-day window · needs a fresh signature' },
   { id: 'account_closed', label: 'Account Closed', description: 'Sending institution flagged the account closed · usually needs research' },

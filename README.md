@@ -1,8 +1,8 @@
-# Triagent — AI Triage for Document Operations
+# TriAgent — AI Triage for Document Operations
 
 > **AI triages, humans approve.**
 
-[![CI](https://github.com/TrishulMallur/Triagent/actions/workflows/ci.yml/badge.svg)](https://github.com/TrishulMallur/Triagent/actions/workflows/ci.yml)
+[![CI](https://github.com/TrishulMallur/TriAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/TrishulMallur/TriAgent/actions/workflows/ci.yml)
 
 **🔗 Live demo — [triagent-six.vercel.app](https://triagent-six.vercel.app)** · runs zero-config on a mock LLM provider, no signup or API key required.
 

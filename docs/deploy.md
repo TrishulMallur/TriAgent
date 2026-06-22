@@ -18,7 +18,7 @@ The frontend works on Vercel **zero-config** thanks to the mock LLM provider —
 
 ## 1. Prerequisites
 
-- **GitHub account** with this repo pushed. (Already done — repo lives at `github.com/TrishulMallur/triagent`.)
+- **GitHub account** with this repo pushed. (Already done — repo lives at `github.com/TrishulMallur/TriAgent`.)
 - **Vercel account** — free hobby tier, no credit card required. Sign up at https://vercel.com.
 - **Railway account** — sign up at https://railway.com. Hobby plan includes $5/month of usage credit; after that it bills metered usage. A payment method is needed to verify the account but won't be charged inside the free credit.
 - **(Optional)** Anthropic and/or Gemini API keys if you want real LLM responses instead of the deterministic mock. The mock provider produces realistic-looking results and lets the entire UI work — you can ship a portfolio demo without ever provisioning a key.
@@ -35,11 +35,11 @@ You do **not** need:
 ### 2.1 Sign in
 1. Open https://vercel.com in a browser.
 2. Click **Sign Up** (top-right) and choose **Continue with GitHub**.
-3. Authorize the Vercel GitHub app. On first sign-in, Vercel asks which repos it can read — you can grant "All repositories" or pick `TrishulMallur/triagent` specifically.
+3. Authorize the Vercel GitHub app. On first sign-in, Vercel asks which repos it can read — you can grant "All repositories" or pick `TrishulMallur/TriAgent` specifically.
 
 ### 2.2 Import the repo
 1. From the Vercel dashboard, click **Add New...** (top right) → **Project**.
-2. Under "Import Git Repository", find `TrishulMallur/triagent` and click **Import**.
+2. Under "Import Git Repository", find `TrishulMallur/TriAgent` and click **Import**.
    - If you don't see it, click **Adjust GitHub App Permissions** and grant access to the repo.
 
 ### 2.3 Configure the project (almost everything auto-detects)
@@ -62,7 +62,7 @@ Expand the **Environment Variables** section if it isn't already open. Leave it 
 
 ### 2.6 Smoke test the deploy
 1. Click **Visit** (or paste the URL into a new tab).
-2. The dashboard should load with the Triagent branding and the four pipeline cards.
+2. The dashboard should load with the TriAgent branding and the four pipeline cards.
 3. Click the user avatar (top right) → switch to **Financial Advisor** → open **Advisor Notes**.
 4. Click any **Compliant** sample → click **Analyze**.
 5. After a moment a result panel should appear showing the CIRO compliance scores. Since no API keys are set, you'll see a **Using Mock Fallback** badge — that's expected.
@@ -78,12 +78,12 @@ Skip this section if you only want the frontend demo — the mock provider handl
 ### 3.1 Sign in
 1. Open https://railway.com.
 2. Click **Login** → **Login with GitHub**.
-3. Authorize the Railway GitHub app. Like Vercel, on first sign-in you grant access to either all repos or specific ones — grant access to `TrishulMallur/triagent`.
+3. Authorize the Railway GitHub app. Like Vercel, on first sign-in you grant access to either all repos or specific ones — grant access to `TrishulMallur/TriAgent`.
 
 ### 3.2 Create a project from the repo
 1. From the Railway dashboard, click **New Project** (or **+ New**, depending on which dashboard variant you see).
 2. Choose **Deploy from GitHub repo**.
-3. Pick `TrishulMallur/triagent` from the list.
+3. Pick `TrishulMallur/TriAgent` from the list.
 
 Railway detects the `railway.toml` at the repo root and uses `backend/Dockerfile` to build. You should see a deployment card appear in the project canvas and a build start automatically within a few seconds.
 

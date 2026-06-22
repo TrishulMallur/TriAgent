@@ -1,5 +1,5 @@
 """
-Triagent — Backend
+TriAgent — Backend
 FastAPI server for AI orchestration, audit logging, and document processing.
 
 Run: uvicorn main:app --reload --port 8000
@@ -53,7 +53,7 @@ _OPENROUTER_HTTP_REFERER = os.getenv(
 _OPENROUTER_TITLE = os.getenv("OPENROUTER_TITLE", "TriAgent")
 
 app = FastAPI(
-    title="Triagent — AI Document Triage Backend",
+    title="TriAgent — AI Document Triage Backend",
     version="2.0.0",
     description="AI triage agent for regulated document operations — backend API.",
 )
@@ -1239,7 +1239,7 @@ Verdict: 80-100 = compliant, 50-79 = needs_completion, 0-49 = non_compliant
 Flag vague statements like "discussed risk" as insufficient — CIRO requires SPECIFIC documentation.
 Return ONLY the JSON object, no other text."""
 
-TRANSFER_VALIDATION_PROMPT = """You are a transfer document validation system for Triagent, a Canadian financial platform. You validate inbound account transfer documents against ATON/ACATS rules.
+TRANSFER_VALIDATION_PROMPT = """You are a transfer document validation system for TriAgent, a Canadian financial platform. You validate inbound account transfer documents against ATON/ACATS rules.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -1286,7 +1286,7 @@ Validation rules:
 
 Return ONLY the JSON object, no other text."""
 
-DOCUMENT_EXTRACTION_PROMPT = """You are a document extraction system for Triagent. You read unstructured transfer documents from legacy banks and extract all fields into a structured format.
+DOCUMENT_EXTRACTION_PROMPT = """You are a document extraction system for TriAgent. You read unstructured transfer documents from legacy banks and extract all fields into a structured format.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -1325,9 +1325,9 @@ Fields to extract (in order):
 If a field cannot be found, return value as null with low confidence and explain why.
 Return ONLY the JSON object, no other text."""
 
-EXCEPTION_DIAGNOSIS_PROMPT = """You are an account transfer exception resolution system for Triagent. When a transfer is rejected by the losing institution, you diagnose the root cause and draft a client communication.
+EXCEPTION_DIAGNOSIS_PROMPT = """You are an account transfer exception resolution system for TriAgent. When a transfer is rejected by the losing institution, you diagnose the root cause and draft a client communication.
 
-You will receive: the rejection code and reason, the client's Triagent profile, and the original transfer details.
+You will receive: the rejection code and reason, the client's TriAgent profile, and the original transfer details.
 
 You MUST return a valid JSON object with this exact structure:
 {
@@ -1347,10 +1347,10 @@ You MUST return a valid JSON object with this exact structure:
 Guidelines:
 - Use the client's first name in the email
 - Be specific about what the client needs to do
-- Keep the email warm, clear, and action-oriented, this is Triagent's brand voice
+- Keep the email warm, clear, and action-oriented, this is TriAgent's brand voice
 - If the diagnosis is uncertain, set requiresManualReview to true
 - Never instruct the client to do something impossible or incorrect
-- For fee issues, mention Triagent's transfer fee reimbursement program
+- For fee issues, mention TriAgent's transfer fee reimbursement program
 
 Return ONLY the JSON object, no other text."""
 

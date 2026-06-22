@@ -4,9 +4,9 @@ import { createMockProvider } from './mock-provider';
 // Minimal prompts containing the unique routing substrings from src/lib/ai.ts.
 const SYSTEM_PROMPTS = {
   advisorNote: 'You are a CIRO compliance auditor for a Canadian advisory firm.',
-  validation: 'You are a transfer document validation system for Triagent.',
-  extraction: 'You are a document extraction system for Triagent.',
-  exception: 'You are an account transfer exception resolution system for Triagent.',
+  validation: 'You are a transfer document validation system for TriAgent.',
+  extraction: 'You are a document extraction system for TriAgent.',
+  exception: 'You are an account transfer exception resolution system for TriAgent.',
 };
 
 describe('createMockProvider', () => {

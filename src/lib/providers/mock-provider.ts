@@ -375,17 +375,17 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
   switch (diagnosed) {
     case 'name_mismatch':
       return {
-        rootCause: `The account holder name registered at ${sendingInstitution} does not match the name on the Triagent account for ${clientFullName}. Details from the rejection: "${rejectionReason}". This is a common name-mismatch case (legal name vs preferred name, missing middle initial, or hyphenated surname variation).`,
+        rootCause: `The account holder name registered at ${sendingInstitution} does not match the name on the TriAgent account for ${clientFullName}. Details from the rejection: "${rejectionReason}". This is a common name-mismatch case (legal name vs preferred name, missing middle initial, or hyphenated surname variation).`,
         rejectionType: 'name_mismatch',
         resolutionSteps: [
-          `Verify the client's legal name on file at Triagent against the name registered at ${sendingInstitution}`,
+          `Verify the client's legal name on file at TriAgent against the name registered at ${sendingInstitution}`,
           `Ask ${clientFirstName} to confirm the exact legal name as it appears at ${sendingInstitution} (including middle names/initials and hyphens)`,
-          'Update the Triagent account profile to match the legal name at the sending institution',
+          'Update the TriAgent account profile to match the legal name at the sending institution',
           'Resubmit the transfer request with the corrected name',
         ],
         draftedEmail: {
           subject: `Action needed: Your account transfer from ${sendingInstitution}`,
-          body: `Hi ${clientFirstName},\n\nWe're writing about your recent account transfer request from ${sendingInstitution} to Triagent${amountClause}.\n\n${sendingInstitution} was unable to process the transfer because the name on your account there doesn't exactly match the name on your Triagent account. Specifically: ${rejectionReason}\n\nTo fix this, we'll need to align the names on both accounts. Could you reply to this email and confirm the exact legal name as it appears on your ${sendingInstitution} account · including any middle names, initials, or hyphens?\n\nOnce confirmed, we'll update your Triagent account and resubmit the transfer right away. This usually takes 1-2 business days after we hear back from you.\n\nIf you have any questions, just reply to this email or call us at 1-855-255-9038.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe're writing about your recent account transfer request from ${sendingInstitution} to TriAgent${amountClause}.\n\n${sendingInstitution} was unable to process the transfer because the name on your account there doesn't exactly match the name on your TriAgent account. Specifically: ${rejectionReason}\n\nTo fix this, we'll need to align the names on both accounts. Could you reply to this email and confirm the exact legal name as it appears on your ${sendingInstitution} account · including any middle names, initials, or hyphens?\n\nOnce confirmed, we'll update your TriAgent account and resubmit the transfer right away. This usually takes 1-2 business days after we hear back from you.\n\nIf you have any questions, just reply to this email or call us at 1-855-255-9038.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Name mismatch case for ${clientFullName} at ${sendingInstitution}. Rejection details: ${rejectionReason}. Update WS profile to match the sending institution's records before resubmission. Standard ATON-401 workflow.`,
         confidence: 'high',
@@ -394,18 +394,18 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
 
     case 'insufficient_fee':
       return {
-        rootCause: `${sendingInstitution} charges a transfer-out fee that ${clientFirstName}'s ${accountType} account does not have sufficient cash to cover. Rejection details: "${rejectionReason}". Triagent reimburses transfer-out fees, but the sending institution must first be able to deduct or collect the fee at their end before the assets can move.`,
+        rootCause: `${sendingInstitution} charges a transfer-out fee that ${clientFirstName}'s ${accountType} account does not have sufficient cash to cover. Rejection details: "${rejectionReason}". TriAgent reimburses transfer-out fees, but the sending institution must first be able to deduct or collect the fee at their end before the assets can move.`,
         rejectionType: 'insufficient_fee',
         resolutionSteps: [
           `Confirm the exact transfer-out fee charged by ${sendingInstitution} and the current cash balance in the source account`,
           `Ask ${sendingInstitution} to deduct the fee from the proceeds of a small security sale (if the account holds securities) · this is the standard workaround for cash-light registered accounts`,
           `Alternatively, have ${clientFirstName} deposit enough cash at ${sendingInstitution} to cover the shortfall, or arrange for the fee to be billed externally`,
-          `Inform ${clientFirstName} that Triagent will reimburse the transfer-out fee (up to $150 per account) once the transfer completes · they should keep the fee receipt`,
+          `Inform ${clientFirstName} that TriAgent will reimburse the transfer-out fee (up to $150 per account) once the transfer completes · they should keep the fee receipt`,
           'Resubmit the transfer once the fee is covered',
         ],
         draftedEmail: {
           subject: `Quick fix needed on your transfer from ${sendingInstitution}`,
-          body: `Hi ${clientFirstName},\n\nWe ran into a small snag with your transfer from ${sendingInstitution}${amountClause}.\n\n${sendingInstitution} couldn't process the transfer because they need to collect a transfer-out fee, and there isn't enough cash in the account to cover it. Specifically: ${rejectionReason}\n\nGood news: Triagent reimburses transfer-out fees up to $150 per account, so this won't cost you anything in the end. There are a couple of ways to get unstuck:\n\n1. Ask ${sendingInstitution} to deduct the fee from the sale of a small portion of your holdings (this is the most common approach for accounts that are mostly invested in securities)\n2. Add enough cash to the ${sendingInstitution} account to cover the fee\n\nJust hold on to the fee receipt and reply to this email once it's sorted · we'll resubmit the transfer and reimburse you as soon as the assets arrive.\n\nQuestions? Reply here or call us at 1-855-255-9038.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe ran into a small snag with your transfer from ${sendingInstitution}${amountClause}.\n\n${sendingInstitution} couldn't process the transfer because they need to collect a transfer-out fee, and there isn't enough cash in the account to cover it. Specifically: ${rejectionReason}\n\nGood news: TriAgent reimburses transfer-out fees up to $150 per account, so this won't cost you anything in the end. There are a couple of ways to get unstuck:\n\n1. Ask ${sendingInstitution} to deduct the fee from the sale of a small portion of your holdings (this is the most common approach for accounts that are mostly invested in securities)\n2. Add enough cash to the ${sendingInstitution} account to cover the fee\n\nJust hold on to the fee receipt and reply to this email once it's sorted · we'll resubmit the transfer and reimburse you as soon as the assets arrive.\n\nQuestions? Reply here or call us at 1-855-255-9038.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Insufficient fee for ${clientFullName} at ${sendingInstitution}. ${rejectionReason}. Standard ATON-502 workflow: confirm holdings, recommend security-sale deduction or external cash deposit, queue reimbursement on completion. Account: ${accountType}.`,
         confidence: 'high',
@@ -414,18 +414,18 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
 
     case 'account_type_conflict':
       return {
-        rootCause: `The source account at ${sendingInstitution} is a Locked-In Retirement Account (LIRA), but the configured Triagent destination is a ${accountType} account. LIRA funds are governed by provincial pension legislation and can only be transferred into another locked-in vehicle (LIRA, LIF, or LRIF). Rejection details: "${rejectionReason}".`,
+        rootCause: `The source account at ${sendingInstitution} is a Locked-In Retirement Account (LIRA), but the configured TriAgent destination is a ${accountType} account. LIRA funds are governed by provincial pension legislation and can only be transferred into another locked-in vehicle (LIRA, LIF, or LRIF). Rejection details: "${rejectionReason}".`,
         rejectionType: 'account_type_conflict',
         resolutionSteps: [
           `Confirm with ${clientFirstName} that the source account is in fact locked-in (LIRA) and identify the governing jurisdiction (federal vs province)`,
-          `Open a matching locked-in account at Triagent (LIRA, or LIF if the client is at the de-locking age) in the same jurisdiction as the source`,
+          `Open a matching locked-in account at TriAgent (LIRA, or LIF if the client is at the de-locking age) in the same jurisdiction as the source`,
           `Update the transfer destination to the new locked-in account number`,
           `Explain to ${clientFirstName} that LIRA funds cannot be moved to a non-registered or regular RRSP account due to pension regulations`,
           'Resubmit the transfer with the corrected destination account',
         ],
         draftedEmail: {
           subject: `One quick step on your transfer from ${sendingInstitution}`,
-          body: `Hi ${clientFirstName},\n\nWe're working on your transfer from ${sendingInstitution}${amountClause} and need a quick adjustment before we can move forward.\n\nThe account you're transferring from is a Locked-In Retirement Account (LIRA). Because LIRA funds are governed by provincial pension legislation, they can only be moved into another locked-in account · they can't go into a regular RRSP or a non-registered account.\n\nWhat this means: we'll need to open a matching LIRA at Triagent in the same jurisdiction as your existing one, and route the transfer there. It only takes a few minutes · we can walk you through it.\n\nReply to this email or call us at 1-855-255-9038 and we'll get this set up right away.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe're working on your transfer from ${sendingInstitution}${amountClause} and need a quick adjustment before we can move forward.\n\nThe account you're transferring from is a Locked-In Retirement Account (LIRA). Because LIRA funds are governed by provincial pension legislation, they can only be moved into another locked-in account · they can't go into a regular RRSP or a non-registered account.\n\nWhat this means: we'll need to open a matching LIRA at TriAgent in the same jurisdiction as your existing one, and route the transfer there. It only takes a few minutes · we can walk you through it.\n\nReply to this email or call us at 1-855-255-9038 and we'll get this set up right away.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Account type conflict for ${clientFullName}: LIRA → ${accountType} at ${sendingInstitution}. ${rejectionReason}. Need to open a matching locked-in account at WS in the correct jurisdiction (confirm province with client). Standard ATON-403 workflow.`,
         confidence: 'high',
@@ -444,7 +444,7 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
         ],
         draftedEmail: {
           subject: `Quick signature needed for your ${sendingInstitution} transfer`,
-          body: `Hi ${clientFirstName},\n\nWe're so close to wrapping up your transfer from ${sendingInstitution}${amountClause} · we just need a signature.\n\n${sendingInstitution} returned the form because the signature on the authorization page was missing. Specifically: ${rejectionReason}\n\nWe've prepared a fresh e-signature link below that has the signature field highlighted in yellow so you can't miss it. It takes about 30 seconds:\n\n[E-SIGNATURE LINK]\n\nAs soon as you sign, we'll resubmit to ${sendingInstitution} the same day. The transfer should complete 1-3 business days after that.\n\nLet us know if you have any questions · reply to this email or call 1-855-255-9038.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe're so close to wrapping up your transfer from ${sendingInstitution}${amountClause} · we just need a signature.\n\n${sendingInstitution} returned the form because the signature on the authorization page was missing. Specifically: ${rejectionReason}\n\nWe've prepared a fresh e-signature link below that has the signature field highlighted in yellow so you can't miss it. It takes about 30 seconds:\n\n[E-SIGNATURE LINK]\n\nAs soon as you sign, we'll resubmit to ${sendingInstitution} the same day. The transfer should complete 1-3 business days after that.\n\nLet us know if you have any questions · reply to this email or call 1-855-255-9038.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Missing signature for ${clientFullName} on ${sendingInstitution} transfer authorization. ${rejectionReason}. Resend via e-signature with field highlighted. Standard ATON-301 workflow.`,
         confidence: 'high',
@@ -462,7 +462,7 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
         ],
         draftedEmail: {
           subject: `Quick re-sign needed on your ${sendingInstitution} transfer`,
-          body: `Hi ${clientFirstName},\n\nYour transfer authorization from ${sendingInstitution}${amountClause} is now more than 90 days old, so ${sendingInstitution} requires a fresh signature.\n\nWe've prepared an updated form below · it takes about a minute to sign:\n\n[E-SIGNATURE LINK]\n\nOnce we have it, we'll resubmit the same day. Thanks for your patience!\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nYour transfer authorization from ${sendingInstitution}${amountClause} is now more than 90 days old, so ${sendingInstitution} requires a fresh signature.\n\nWe've prepared an updated form below · it takes about a minute to sign:\n\n[E-SIGNATURE LINK]\n\nOnce we have it, we'll resubmit the same day. Thanks for your patience!\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Expired authorization for ${clientFullName} at ${sendingInstitution}. ${rejectionReason}. Re-send via e-signature.`,
         confidence: 'high',
@@ -480,7 +480,7 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
         ],
         draftedEmail: {
           subject: `Question about your ${sendingInstitution} account`,
-          body: `Hi ${clientFirstName},\n\nWe tried to process your transfer from ${sendingInstitution}${amountClause}, but ${sendingInstitution} reported that the source account is closed.\n\nCould you confirm whether you recently closed this account or moved the funds? If the account should still be open, let us know and we'll work directly with ${sendingInstitution} to get this resolved.\n\nReply to this email or call 1-855-255-9038 whenever it's convenient.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe tried to process your transfer from ${sendingInstitution}${amountClause}, but ${sendingInstitution} reported that the source account is closed.\n\nCould you confirm whether you recently closed this account or moved the funds? If the account should still be open, let us know and we'll work directly with ${sendingInstitution} to get this resolved.\n\nReply to this email or call 1-855-255-9038 whenever it's convenient.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Source account reported closed at ${sendingInstitution} for ${clientFullName}. ${rejectionReason}. Awaiting client confirmation and follow-up with institution.`,
         confidence: 'medium',
@@ -500,7 +500,7 @@ function buildExceptionResponse(diagnosed: DiagnosedType, ctx: ParsedExceptionCo
         ],
         draftedEmail: {
           subject: `We're looking into your ${sendingInstitution} transfer`,
-          body: `Hi ${clientFirstName},\n\nWe wanted to let you know we hit a snag on your transfer from ${sendingInstitution}${amountClause} and our operations team is reviewing it directly with the sending institution.\n\nWe'll be back in touch within 1-2 business days with next steps. No action is needed from you right now.\n\nThanks for your patience.\n\nBest,\nTriagent Transfer Operations`,
+          body: `Hi ${clientFirstName},\n\nWe wanted to let you know we hit a snag on your transfer from ${sendingInstitution}${amountClause} and our operations team is reviewing it directly with the sending institution.\n\nWe'll be back in touch within 1-2 business days with next steps. No action is needed from you right now.\n\nThanks for your patience.\n\nBest,\nTriAgent Transfer Operations`,
         },
         internalNotes: `Atypical rejection for ${clientFullName} at ${sendingInstitution}: ${rejectionReason}. Automated diagnosis insufficient · operator must review before any client action.`,
         confidence: 'low',
