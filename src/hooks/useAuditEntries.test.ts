@@ -102,7 +102,11 @@ describe('useAuditEntries', () => {
     if (result.current.status !== 'fallback') throw new Error('expected fallback');
     expect(result.current.source).toBe('mock');
     expect(result.current.entries).toBe(FALLBACK);
-    expect(result.current.reason).toMatch(/unreachable/i);
+    // Either fallback path can win the race — the health-check flip
+    // ('Backend unreachable') or the audit fetch rejecting ('Failed to fetch').
+    // Both are valid backend-down reasons; accept either so this is deterministic
+    // regardless of which settles first (the local .env masked this; CI exposed it).
+    expect(result.current.reason).toMatch(/unreachable|failed to fetch/i);
 
     // After the backend is known to be down, our hook must not fire any
     // further /api/audit requests. (It may have fired one optimistic

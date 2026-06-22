@@ -186,15 +186,23 @@ describe('LLMContext', () => {
     });
     const callsAfterMount = setActiveProviderMock.mock.calls.length;
 
-    // Force the effective provider to flip: turning useBackend off and then
-    // setting the active id to 'mock' guarantees the memo result changes
-    // regardless of starting env (works whether useBackend started true or
-    // false).
+    // Force a guaranteed change of the *effective* provider, independent of the
+    // starting env or any provider id persisted in localStorage by a prior test.
+    // Flipping to (mock, no-backend) is a no-op when the app already starts there
+    // (which it does on a clean CI runner with no .env). Instead: turn backend
+    // off, configure a real Claude key, and select Claude — yielding a configured
+    // Claude provider that is distinct from the mount-time effective provider
+    // (mock or backend) in every environment.
     act(() => {
       captured!.setUseBackend(false);
     });
     act(() => {
-      captured!.setProvider('mock');
+      captured!.updateConfig({
+        claude: { apiKey: 'test-key', model: 'claude-sonnet-4-20250514' },
+      });
+    });
+    act(() => {
+      captured!.setProvider('claude');
     });
 
     await waitFor(() => {
