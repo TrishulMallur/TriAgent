@@ -6,6 +6,8 @@
 
 **🔗 Live demo — [triagent-six.vercel.app](https://triagent-six.vercel.app)** · runs zero-config on a mock LLM provider, no signup or API key required.
 
+**📄 Engineering case study — [CASE_STUDY.md](CASE_STUDY.md)** · the architecture, testing, security, and delivery story behind the project.
+
 An AI triage agent that extracts, validates, and routes regulated financial documents through SLA-driven workflows with human-in-the-loop review. Built as a portfolio project demonstrating multi-provider LLM orchestration, schema-validated AI responses, real-time SLA tracking, and a worker-pool batch pipeline.
 
 ![Dashboard](docs/screenshots/01-dashboard.png)
