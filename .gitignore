@@ -1,0 +1,60 @@
+node_modules
+dist
+build
+
+# Environment variables, never commit real keys
+.env
+.env.*
+!.env.example
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Playwright artifacts
+test-results/
+playwright-report/
+e2e/.gitignore
+
+# Firebase Hosting deploy cache + project alias (project ID is non-secret
+# but kept private by preference)
+.firebase/
+.firebaserc
+
+# Local databases (FastAPI backend creates audit.db at runtime)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Python (backend) cache + venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.python-version
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Agent / AI tool local state (Claude Code, Cursor, internal scratchpads)
+.claude/
+.agency/
+.cursor/
+.aider*
+
+# Graphify knowledge-graph output (generated; embeds local absolute paths)
+graphify-out/
+
+# Log files
+*.log
+logs/
+.vercel

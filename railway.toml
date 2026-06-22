@@ -1,0 +1,20 @@
+# Railway service configuration.
+#
+# IMPORTANT: In the Railway dashboard for this service, set
+#   Settings -> Service -> Root Directory = "backend"
+# Railway treats Root Directory as the build context, and the paths below
+# (dockerfilePath, healthcheckPath) are resolved relative to it.
+# With Root Directory = "backend", `dockerfilePath = "Dockerfile"` points at
+# backend/Dockerfile and the Dockerfile's `COPY requirements.txt ./` works.
+#
+# Docs: https://docs.railway.com/reference/config-as-code
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10

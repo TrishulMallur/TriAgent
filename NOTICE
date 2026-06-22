@@ -1,0 +1,12 @@
+Triagent
+Copyright 2026 Trishul Mallur
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+This product is a portfolio demonstration of AI-assisted document triage for
+regulated document operations. It is not a production system and handles no
+real client data, money, or regulatory filings.

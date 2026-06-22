@@ -1,0 +1,16 @@
+# Frontend build artifacts — Railway only needs the backend/ folder
+node_modules/
+dist/
+graphify-out/
+.agency/
+
+# Python caches inside backend/
+backend/__pycache__/
+backend/.venv/
+backend/*.pyc
+backend/audit.db
+
+# Dev / editor
+.vscode/
+.idea/
+*.log
