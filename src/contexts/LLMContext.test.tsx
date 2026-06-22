@@ -47,6 +47,11 @@ function renderWithProvider() {
 
 beforeEach(() => {
   captured = null;
+  // Clear persisted provider config · LLMContext mirrors updateConfig() to
+  // localStorage and hydrates from it on mount, so a key set by an earlier
+  // test (e.g. 'test-key') would otherwise leak into this one's initial state.
+  // Harmless locally (real .env masks it) but breaks on a clean CI runner.
+  localStorage.clear();
   setActiveProviderMock.mockClear();
   // Default fetch mock so tests that don't care about backend health checks
   // don't accidentally hit the real network. Each test that needs a specific
