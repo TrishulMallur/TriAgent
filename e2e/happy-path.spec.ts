@@ -23,7 +23,7 @@ test('Ingestion -> Validation happy path with the clean TD sample', async ({ pag
   // Pick the clean TD sample. DocumentInput renders a native <select>,
   // so selectOption({ label: ... }) works.
   const sampleSelect = page.locator('select').first();
-  await sampleSelect.selectOption({ label: 'Clean — TD Canada Trust' });
+  await sampleSelect.selectOption({ label: 'Clean · TD Canada Trust' });
 
   // Kick off extraction.
   await page.getByRole('button', { name: 'Extract Fields' }).click();

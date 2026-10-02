@@ -5,6 +5,7 @@ import { useRole } from '@/contexts/RoleContext';
 import { useLLM } from '@/contexts/LLMContext';
 import { useToast } from '@/contexts/ToastContext';
 import type { ProviderId, ProviderConfig } from '@/lib/llm-provider';
+import { looksLikeCompleteKey } from '@/lib/llm-provider';
 import { UserManagement } from './UserManagement';
 import { RuleConfiguration } from './RuleConfiguration';
 import { ApiKeyManager } from './ApiKeyManager';
@@ -33,7 +34,8 @@ const PROVIDER_OPTIONS = [
   { value: 'openrouter', label: 'OpenRouter' },
   { value: 'lmstudio', label: 'LM Studio (Local)' },
   { value: 'llamacpp', label: 'llama.cpp (Local)' },
-  { value: 'backend', label: 'Backend Proxy (Railway)' },
+  // No standalone 'backend' option: the Railway proxy needs the visitor's own
+  // key, so cloud providers above reach it automatically once a key is added.
   { value: 'mock', label: 'Mock (Demo Mode)' },
 ];
 
@@ -125,8 +127,8 @@ function AIProviderSettings() {
     }
   };
 
-  const claudeConfigured = !!config.claude.apiKey;
-  const geminiConfigured = !!config.gemini.apiKey;
+  const claudeConfigured = looksLikeCompleteKey(config.claude.apiKey);
+  const geminiConfigured = looksLikeCompleteKey(config.gemini.apiKey);
 
   return (
     <div className="space-y-8">

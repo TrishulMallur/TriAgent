@@ -78,7 +78,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         />
       )}
       <aside
-        className={`fixed top-14 bottom-0 left-0 z-40 w-64 bg-ws-surface border-r border-ws-border flex flex-col transition-transform duration-200 ease-out-quart lg:sticky lg:top-14 lg:z-auto lg:h-[calc(100vh-3.5rem)] lg:translate-x-0 lg:transition-none ${
+        className={`fixed top-14 bottom-0 left-0 z-40 w-64 bg-ws-surface border-r border-ws-border flex flex-col transition-transform duration-200 ease-out-quart lg:static lg:z-auto lg:h-auto lg:translate-x-0 lg:transition-none ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -92,6 +92,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               <NavLink
                 to={item.path}
                 onClick={onClose}
+                data-tour={`nav-${item.id}`}
                 className={() =>
                   `group relative flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium tracking-[-0.005em] transition-colors duration-150 ease-out-quart ${
                     isActive

@@ -24,6 +24,17 @@ export default defineConfig({
     headless: true,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
+    // The first-visit walkthrough would cover the page; specs start with it
+    // already seen. e2e/onboarding.spec.ts overrides this to test the tour.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: 'http://localhost:5173',
+          localStorage: [{ name: 'triagent.tour.v1.seen', value: '1' }],
+        },
+      ],
+    },
   },
   projects: [
     {

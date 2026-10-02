@@ -24,15 +24,19 @@ test('Settings: llama.cpp test connection fails gracefully without crashing', as
   await providerSelect.selectOption({ label: 'llama.cpp (Local)' });
 
   // Provider-specific config card should render with an endpoint input
-  // pre-filled to http://localhost:8080.
-  const endpointInput = page.locator('input[placeholder="http://localhost:8080"]');
+  // pre-filled to http://localhost:8080. Scoped to that card: the Personal AI
+  // Keys grid on the same tab has its own llama.cpp URL input.
+  const llamaCard = page.locator('div', { hasText: 'llama.cpp Configuration' }).filter({
+    has: page.getByRole('button', { name: 'Test Connection', exact: true }),
+  }).last();
+  const endpointInput = llamaCard.locator('input[placeholder="http://localhost:8080"]');
   await expect(endpointInput).toBeVisible({ timeout: 10_000 });
 
   // Click "Test Connection". With no server running, the fetch fails
   // and the UI shows the "Connection Failed" status badge.
-  await page.getByRole('button', { name: /Test Connection/i }).click();
+  await llamaCard.getByRole('button', { name: 'Test Connection', exact: true }).click();
 
-  await expect(page.getByText('Connection Failed')).toBeVisible({ timeout: 10_000 });
+  await expect(llamaCard.getByText('Connection Failed')).toBeVisible({ timeout: 10_000 });
 
   // Page itself should not have crashed.
   await expect(page.getByText('Something went wrong')).not.toBeVisible();

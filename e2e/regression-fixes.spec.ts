@@ -16,7 +16,7 @@ test('Ingestion: Errors — RBC Direct sample does not crash and renders Wei Zha
   await page.getByRole('tab', { name: 'Use Sample' }).first().click();
 
   const sampleSelect = page.locator('select').first();
-  await sampleSelect.selectOption({ label: 'Errors — RBC Direct' });
+  await sampleSelect.selectOption({ label: 'Errors · RBC Direct' });
 
   await page.getByRole('button', { name: 'Extract Fields' }).click();
 

@@ -24,7 +24,6 @@ const setActiveProviderMock = setActiveProvider as unknown as ReturnType<typeof 
 // Tests are written against this real env (and instructions are not to
 // modify source files, including .env). We pin the values we depend on
 // here so that breaking changes to .env surface as test failures.
-const ENV_DEFAULT_PROVIDER = import.meta.env.VITE_DEFAULT_PROVIDER || 'claude';
 const ENV_USE_BACKEND = import.meta.env.VITE_USE_BACKEND === 'true';
 
 // ---------------------------------------------------------------
@@ -72,17 +71,16 @@ describe('LLMContext', () => {
     renderWithProvider();
 
     expect(captured).not.toBeNull();
-    // The default provider id mirrors VITE_DEFAULT_PROVIDER (or 'claude').
-    expect(captured!.activeProviderId).toBe(ENV_DEFAULT_PROVIDER);
+    // Every first-time visitor starts in demo mode, whatever the build env says.
+    expect(captured!.activeProviderId).toBe('mock');
     expect(captured!.useBackend).toBe(ENV_USE_BACKEND);
 
-    // Wait for the effective-provider effect to settle. With useBackend=true
-    // and a healthy fetch mock, the effective provider is the backend
-    // (reports as 'backend'). With useBackend=false and no configured key,
-    // it falls back to mock.
+    // Wait for the effective-provider effect to settle. A fresh visitor has no
+    // key of their own (only '' or the build-time placeholder), so even with
+    // useBackend=true and a healthy backend the effective provider is mock --
+    // the backend proxy needs the visitor's key and would answer 401.
     await waitFor(() => {
-      const expected = ENV_USE_BACKEND ? 'backend' : 'mock';
-      expect(captured!.provider.id).toBe(expected);
+      expect(captured!.provider.id).toBe('mock');
     });
   });
 
@@ -96,16 +94,16 @@ describe('LLMContext', () => {
   it('updates activeProviderId when setProvider is called', () => {
     renderWithProvider();
     const initial = captured!.activeProviderId;
-    expect(initial).toBe(ENV_DEFAULT_PROVIDER);
+    expect(initial).toBe('mock');
 
     act(() => {
-      captured!.setProvider('mock');
+      captured!.setProvider('claude');
     });
 
-    expect(captured!.activeProviderId).toBe('mock');
+    expect(captured!.activeProviderId).toBe('claude');
   });
 
-  it('uses the backend provider when health check succeeds', async () => {
+  it('uses the backend provider when health check succeeds and the visitor has a key', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -114,6 +112,14 @@ describe('LLMContext', () => {
 
     renderWithProvider();
 
+    act(() => {
+      captured!.updateConfig({
+        claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' },
+      });
+    });
+    act(() => {
+      captured!.setProvider('claude');
+    });
     act(() => {
       captured!.setUseBackend(true);
     });
@@ -129,6 +135,147 @@ describe('LLMContext', () => {
     );
   });
 
+  // Regression: the live demo routed key-less visitors through the backend
+  // proxy, which forwarded '' or the build-time placeholder as the visitor's
+  // key -> every AI action failed with 401 instead of using the mock provider.
+  it.each([
+    ['no key', ''],
+    ['the build-time placeholder key', 'your_claude_key_here'],
+  ])('uses the mock provider, not the backend, when the visitor has %s', async (_label, key) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response));
+
+    renderWithProvider();
+
+    act(() => {
+      captured!.updateConfig({
+        claude: { apiKey: key, model: 'claude-sonnet-4-20250514' },
+      });
+    });
+    act(() => {
+      captured!.setProvider('claude');
+    });
+    act(() => {
+      captured!.setUseBackend(true);
+    });
+
+    await waitFor(() => {
+      expect(captured!.provider.id).toBe('mock');
+    });
+    // Give the health-check effect a chance to (wrongly) switch to backend.
+    await new Promise((r) => setTimeout(r, 50));
+    expect(captured!.provider.id).toBe('mock');
+  });
+
+  it('keeps a returning visitor on the provider they chose', () => {
+    localStorage.setItem('triagent.providers.active', 'gemini');
+    renderWithProvider();
+    expect(captured!.activeProviderId).toBe('gemini');
+  });
+
+  it('never routes demo mode through the backend, even with a stored key', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response));
+    renderWithProvider();
+    act(() => {
+      captured!.updateConfig({ gemini: { apiKey: 'real-gemini-key', model: 'gemini-2.0-flash' } });
+    });
+    act(() => {
+      captured!.setUseBackend(true);
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(captured!.activeProviderId).toBe('mock');
+    expect(captured!.provider.id).toBe('mock');
+  });
+
+  it('a stored "backend" provider is not restored and makes no proxy call', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response);
+    vi.stubGlobal('fetch', fetchMock);
+    localStorage.setItem('triagent.providers.active', 'backend');
+    renderWithProvider();
+    act(() => {
+      captured!.setUseBackend(true);
+    });
+    expect(captured!.activeProviderId).toBe('mock');
+    await captured!.provider.analyze('You are a CIRO compliance auditor.', 'Met with client.', 16);
+    const urls = fetchMock.mock.calls.map((c) => String(c[0]));
+    expect(urls.some((u) => u.includes('/api/llm/'))).toBe(false);
+  }, 10_000);
+
+  it('choosing "backend" at runtime still answers from the mock provider', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response));
+    renderWithProvider();
+    act(() => {
+      captured!.setUseBackend(false);
+    });
+    act(() => {
+      captured!.setProvider('backend');
+    });
+    await waitFor(() => expect(captured!.provider.id).toBe('mock'));
+  });
+
+  it('survives blocked storage and starts in demo mode', () => {
+    const blocked = () => {
+      throw new DOMException('blocked', 'SecurityError');
+    };
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(blocked);
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(blocked);
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(blocked);
+    expect(() => renderWithProvider()).not.toThrow();
+    expect(captured!.activeProviderId).toBe('mock');
+    expect(captured!.provider.id).toBe('mock');
+  });
+
+  // Round-2 review: with a cloud provider already selected, clearing the key and
+  // typing one character must not go live with a half-typed key.
+  it('a half-typed replacement key keeps the selected cloud provider in demo mode', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response);
+    vi.stubGlobal('fetch', fetchMock);
+    renderWithProvider();
+    act(() => {
+      captured!.updateConfig({ claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' } });
+    });
+    act(() => {
+      captured!.setProvider('claude');
+    });
+    act(() => {
+      captured!.setUseBackend(true);
+    });
+    await waitFor(() => expect(captured!.provider.id).toBe('backend'));
+
+    act(() => {
+      captured!.updateConfig({ claude: { apiKey: '', model: 'claude-sonnet-4-20250514' } });
+    });
+    act(() => {
+      captured!.updateConfig({ claude: { apiKey: 's', model: 'claude-sonnet-4-20250514' } });
+    });
+    await waitFor(() => expect(captured!.provider.id).toBe('mock'));
+    expect(captured!.activeProviderId).toBe('claude');
+    await captured!.provider.analyze('You are a CIRO compliance auditor.', 'Met with client.', 16);
+    expect(fetchMock.mock.calls.map((c) => String(c[0])).some((u) => u.includes('/api/llm/'))).toBe(false);
+  }, 10_000);
+
+  it('isConfigured reports live AI only for a complete cloud key', () => {
+    renderWithProvider();
+    act(() => {
+      captured!.setProvider('claude');
+      captured!.updateConfig({ claude: { apiKey: 's', model: 'claude-sonnet-4-20250514' } });
+    });
+    expect(captured!.isConfigured).toBe(false);
+    act(() => {
+      captured!.updateConfig({ claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' } });
+    });
+    expect(captured!.isConfigured).toBe(true);
+  });
+
+  it('a half-typed key keeps a direct (non-backend) cloud provider in demo mode too', () => {
+    renderWithProvider();
+    act(() => {
+      captured!.setUseBackend(false);
+      captured!.updateConfig({ claude: { apiKey: 'sk-ant-a', model: 'claude-sonnet-4-20250514' } });
+      captured!.setProvider('claude');
+    });
+    expect(captured!.provider.id).toBe('mock');
+  });
+
   it('falls back to in-browser provider when backend fetch rejects', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubGlobal(
@@ -138,8 +285,14 @@ describe('LLMContext', () => {
 
     renderWithProvider();
 
-    // Make sure useBackend is on (even if env already turned it on, toggle is
-    // idempotent and forces a re-run of the health-check effect).
+    // A visitor with a complete Claude key; then backend mode on (the toggle
+    // re-runs the health-check effect).
+    act(() => {
+      captured!.updateConfig({ claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' } });
+    });
+    act(() => {
+      captured!.setProvider('claude');
+    });
     act(() => {
       captured!.setUseBackend(false);
     });
@@ -147,11 +300,10 @@ describe('LLMContext', () => {
       captured!.setUseBackend(true);
     });
 
-    // With useBackend=true but backend unreachable, the effective provider
-    // falls back: in-browser claude isn't configured (key === ''
-    // or 'your_claude_key_here'), so it ends up on the mock provider.
+    // Backend unreachable -> the configured in-browser Claude provider, not the
+    // proxy and not mock.
     await waitFor(() => {
-      expect(captured!.provider.id).toBe('mock');
+      expect(captured!.provider.id).toBe('claude');
     });
 
     const warnCalls = warnSpy.mock.calls.map((c) => String(c[0]));
@@ -168,6 +320,12 @@ describe('LLMContext', () => {
     renderWithProvider();
 
     act(() => {
+      captured!.updateConfig({ claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' } });
+    });
+    act(() => {
+      captured!.setProvider('claude');
+    });
+    act(() => {
       captured!.setUseBackend(false);
     });
     act(() => {
@@ -175,7 +333,7 @@ describe('LLMContext', () => {
     });
 
     await waitFor(() => {
-      expect(captured!.provider.id).toBe('mock');
+      expect(captured!.provider.id).toBe('claude');
     });
 
     const warnCalls = warnSpy.mock.calls.map((c) => String(c[0]));
@@ -203,7 +361,7 @@ describe('LLMContext', () => {
     });
     act(() => {
       captured!.updateConfig({
-        claude: { apiKey: 'test-key', model: 'claude-sonnet-4-20250514' },
+        claude: { apiKey: 'sk-ant-api03-test-0123456789abcdefghij', model: 'claude-sonnet-4-20250514' },
       });
     });
     act(() => {

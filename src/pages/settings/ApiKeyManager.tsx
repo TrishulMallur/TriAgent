@@ -3,7 +3,7 @@ import { Card, Button } from '@/components/ui';
 import { useLLM } from '@/contexts/LLMContext';
 import { useToast } from '@/contexts/ToastContext';
 import type { ProviderId, ProviderConfig } from '@/lib/llm-provider';
-import { PROVIDER_LABELS } from '@/lib/llm-provider';
+import { PROVIDER_LABELS, looksLikeCompleteKey } from '@/lib/llm-provider';
 import {
   CheckCircle2,
   Eye,
@@ -16,7 +16,6 @@ import {
   Server,
   Terminal,
   KeyRound,
-  ShieldCheck,
   Zap,
 } from 'lucide-react';
 
@@ -115,15 +114,8 @@ const CARDS: CardSpec[] = [
     acceptsBaseUrl: true,
     defaultBaseUrl: 'http://localhost:8080',
   },
-  {
-    id: 'backend',
-    label: PROVIDER_LABELS.backend,
-    description: 'TriAgent Railway proxy · forwards every AI call server-side, so CORS never hits your browser.',
-    icon: <ShieldCheck className="w-5 h-5 text-ws-accent" />,
-    acceptsKey: false,
-    acceptsBaseUrl: true,
-    defaultBaseUrl: 'http://localhost:8000',
-  },
+  // No standalone Backend card: the Railway proxy needs the visitor's own key,
+  // so the cloud cards above reach it automatically once a key is added.
 ];
 
 /**
@@ -175,6 +167,25 @@ function modelOf(id: ProviderId, config: ProviderConfig): string {
       return config.openrouter.model;
     default:
       return '';
+  }
+}
+
+/**
+ * Ping a LOCAL model server directly (never the Railway proxy): llama.cpp
+ * exposes `/health`, LM Studio the OpenAI-compatible `/v1/models`.
+ */
+async function pingLocalServer(
+  provider: ProviderId,
+  baseUrl: string,
+): Promise<{ ok: boolean; status: number; message: string }> {
+  const path = provider === 'llamacpp' ? '/health' : '/v1/models';
+  try {
+    const resp = await fetch(`${baseUrl.replace(/\/+$/, '')}${path}`, { signal: AbortSignal.timeout(3000) });
+    return resp.ok
+      ? { ok: true, status: resp.status, message: 'reachable' }
+      : { ok: false, status: resp.status, message: `server returned ${resp.status}` };
+  } catch {
+    return { ok: false, status: 0, message: 'cannot reach the local server — is it running?' };
   }
 }
 
@@ -234,6 +245,8 @@ interface ProviderCardProps {
   baseUrl: string;
   model: string;
   onKeyChange: (v: string) => void;
+  /** The key field was committed (blur, paste, Enter) with this value. */
+  onKeyCommit?: (v: string) => void;
   onBaseUrlChange: (v: string) => void;
   onModelChange: (v: string) => void;
   onClear: () => void;
@@ -246,6 +259,7 @@ function ProviderCard({
   baseUrl,
   model,
   onKeyChange,
+  onKeyCommit,
   onBaseUrlChange,
   onModelChange,
   onClear,
@@ -258,10 +272,17 @@ function ProviderCard({
 
   const hasAnything = (spec.acceptsKey && !!apiKey) || (spec.acceptsBaseUrl && !!baseUrl);
 
+  // Cloud cards go through the proxy, which needs a complete key; local cards
+  // (LM Studio / llama.cpp) are tested against their own server instead.
+  const canTest = spec.acceptsKey ? looksLikeCompleteKey(apiKey) : !!(baseUrl || spec.defaultBaseUrl);
+
   const runTest = async () => {
+    if (!canTest) return;
     setTestStatus('testing');
     setTestMessage('');
-    const result = await pingBackendProxy(backendBaseUrl, spec.id, apiKey, model);
+    const result = spec.acceptsKey
+      ? await pingBackendProxy(backendBaseUrl, spec.id, apiKey, model)
+      : await pingLocalServer(spec.id, baseUrl || spec.defaultBaseUrl || '');
     setTestStatus(result.ok ? 'ok' : 'fail');
     setTestMessage(result.message);
     addToast(
@@ -283,12 +304,12 @@ function ProviderCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-semibold text-ws-dark">{spec.label}</h4>
-              {spec.acceptsKey && apiKey && (
+              {spec.acceptsKey && looksLikeCompleteKey(apiKey) && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
                   <CheckCircle2 className="w-3 h-3" /> key set
                 </span>
               )}
-              {spec.acceptsKey && !apiKey && (
+              {spec.acceptsKey && !looksLikeCompleteKey(apiKey) && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-ws-muted bg-ws-sunken border border-ws-border rounded px-1.5 py-0.5">
                   no key
                 </span>
@@ -307,6 +328,15 @@ function ProviderCard({
                 type={visible ? 'text' : 'password'}
                 value={apiKey}
                 onChange={(e) => onKeyChange(e.target.value)}
+                onBlur={(e) => onKeyCommit?.(e.currentTarget.value)}
+                onPaste={(e) => {
+                  const input = e.currentTarget;
+                  // Read the value after the paste has been applied.
+                  setTimeout(() => onKeyCommit?.(input.value), 0);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onKeyCommit?.(e.currentTarget.value);
+                }}
                 placeholder={spec.id === 'claude' ? 'sk-ant-…' : spec.id === 'gemini' ? 'AIza…' : spec.id === 'openrouter' ? 'sk-or-…' : 'sk-…'}
                 autoComplete="off"
                 spellCheck={false}
@@ -369,7 +399,13 @@ function ProviderCard({
 
         {/* Actions row */}
         <div className="flex items-center gap-2 pt-1">
-          <Button variant="outline" size="sm" onClick={runTest} disabled={testStatus === 'testing'}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={runTest}
+            disabled={testStatus === 'testing' || !canTest}
+            title={canTest ? undefined : 'Paste a complete API key to test it'}
+          >
             {testStatus === 'testing' ? (
               <>
                 <div className="w-3.5 h-3.5 border-2 border-ws-border border-t-ws-accent rounded-full animate-spin" />
@@ -421,7 +457,7 @@ function ProviderCard({
  * context reactivity both come for free.
  */
 export function ApiKeyManager() {
-  const { config, updateConfig, clearApiKey } = useLLM();
+  const { config, updateConfig, clearApiKey, activeProviderId, setProvider } = useLLM();
   const { addToast } = useToast();
 
   const backendBaseUrl = useMemo(
@@ -443,6 +479,17 @@ export function ApiKeyManager() {
       case 'openrouter':
         updateConfig({ openrouter: { ...config.openrouter, apiKey } } as Partial<ProviderConfig>);
         break;
+    }
+  };
+
+  // Leaving demo mode: a complete-looking key committed (blur / paste / Enter)
+  // while on the mock provider makes that provider active, so adding a key is
+  // all a visitor has to do. Never on a keystroke: a half-typed key must not
+  // claim that live AI is on.
+  const commitKey = (id: ProviderId, apiKey: string) => {
+    if (activeProviderId === 'mock' && looksLikeCompleteKey(apiKey)) {
+      setProvider(id);
+      addToast('success', `${PROVIDER_LABELS[id]} key added · live AI is on (demo mode off)`);
     }
   };
 
@@ -499,6 +546,7 @@ export function ApiKeyManager() {
             baseUrl={readBaseUrl(spec.id, config)}
             model={modelOf(spec.id, config)}
             onKeyChange={(v) => setApiKey(spec.id, v)}
+            onKeyCommit={(v) => commitKey(spec.id, v)}
             onBaseUrlChange={(v) => setBaseUrl(spec.id, v)}
             onModelChange={(v) => setModel(spec.id, v)}
             onClear={() => handleClear(spec.id)}

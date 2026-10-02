@@ -94,6 +94,26 @@ export interface ProviderConfig {
  * in AppLayout ("No API key for [label]..."), and the API-key manager cards.
  * Single source of truth · new providers must be added here too.
  */
+/** A build-time template value such as `your_claude_key_here` — never a real key. */
+export function isPlaceholderKey(key: string): boolean {
+  return /^your_[a-z]+_key_here$/.test(key.trim());
+}
+
+/** Something the proxy can forward: non-empty and not a template placeholder. */
+export function hasUsableKey(key: string | undefined): boolean {
+  return !!key && !!key.trim() && !isPlaceholderKey(key);
+}
+
+/**
+ * Plausibly a COMPLETE provider key (used to leave demo mode when a key field is
+ * committed): no whitespace and at least 20 characters. Real Claude, OpenAI,
+ * OpenRouter and Gemini keys are all longer; a half-typed key is not.
+ */
+export function looksLikeCompleteKey(key: string): boolean {
+  const k = key.trim();
+  return hasUsableKey(k) && k.length >= 20 && !/\s/.test(k);
+}
+
 export const PROVIDER_LABELS: Record<ProviderId, string> = {
   claude: 'Claude',
   gemini: 'Gemini',

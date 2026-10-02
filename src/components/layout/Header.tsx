@@ -4,6 +4,7 @@ import {
   BarChart3,
   Briefcase,
   ChevronDown,
+  HelpCircle,
   KeyRound,
   Menu,
   Settings,
@@ -15,6 +16,8 @@ import { useState, useRef, useEffect } from 'react';
 interface HeaderProps {
   /** Toggles the mobile navigation drawer. Inert at `lg`+ where the rail is static. */
   onMenuClick?: () => void;
+  /** Replays the first-visit walkthrough. */
+  onTourClick?: () => void;
 }
 
 const ROLE_ICONS: Record<UserRole, React.ReactNode> = {
@@ -25,7 +28,7 @@ const ROLE_ICONS: Record<UserRole, React.ReactNode> = {
   admin: <KeyRound className="w-4 h-4 text-ws-muted" />,
 };
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, onTourClick }: HeaderProps) {
   const { currentUser, currentRole, switchRole } = useRole();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,7 +44,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   }, []);
 
   return (
-    <header className="h-14 bg-ws-surface border-b border-ws-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+    <header className="h-14 flex-none bg-ws-surface border-b border-ws-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
       {/* Left: Menu (mobile) + Logo + eyebrow */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
@@ -64,10 +67,23 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      {/* Right: Role Switcher */}
+      {/* Right: Tour + Role Switcher */}
+      <div className="flex items-center gap-1 sm:gap-2">
+      {onTourClick && (
+        <button
+          onClick={onTourClick}
+          data-tour="tour-button"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[13px] font-medium text-ws-muted hover:text-ws-dark hover:bg-ws-sunken transition-colors duration-150 ease-out-quart"
+          aria-label="Take the quick tour"
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span className="hidden sm:inline">Quick tour</span>
+        </button>
+      )}
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
+          data-tour="role-switcher"
           className="flex items-center gap-3 px-2.5 py-1.5 rounded-md hover:bg-ws-sunken transition-colors duration-150 ease-out-quart"
         >
           <div className="w-7 h-7 bg-ws-sunken rounded-full flex items-center justify-center">
@@ -126,6 +142,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
           </div>
         )}
+      </div>
       </div>
     </header>
   );

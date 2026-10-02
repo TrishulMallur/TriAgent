@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useMemo, useEffect, type ReactNode } from 'react';
 import type { LLMProvider, ProviderId, ProviderConfig } from '@/lib/llm-provider';
-import { getDefaultConfig } from '@/lib/llm-provider';
+import { getDefaultConfig, looksLikeCompleteKey } from '@/lib/llm-provider';
 import { createClaudeProvider } from '@/lib/providers/claude-provider';
 import { createGeminiProvider } from '@/lib/providers/gemini-provider';
 import { createLMStudioProvider } from '@/lib/providers/lmstudio-provider';
@@ -59,7 +59,10 @@ interface LLMContextType {
 
 const LLMContext = createContext<LLMContextType | null>(null);
 
-const DEFAULT_PROVIDER = (import.meta.env.VITE_DEFAULT_PROVIDER as ProviderId) || 'claude';
+// Every first-time visitor lands in demo mode (mock provider). Pasting a key in
+// Settings switches them to that provider (see ApiKeyManager). A returning
+// visitor keeps whatever provider they last chose (persisted below).
+const DEFAULT_PROVIDER: ProviderId = 'mock';
 const DEFAULT_USE_BACKEND = import.meta.env.VITE_USE_BACKEND === 'true';
 
 /**
@@ -172,8 +175,16 @@ function createProvider(id: ProviderId, config: ProviderConfig): LLMProvider {
 
 export function LLMProviderWrapper({ children }: { children: ReactNode }) {
   const [activeProviderId, setActiveProviderId] = useState<ProviderId>(() => {
-    const stored = typeof window !== 'undefined' ? localStorage.getItem(LS_KEY('active')) : null;
-    return stored && ['claude', 'gemini', 'lmstudio', 'llamacpp', 'openai', 'openrouter', 'backend', 'mock'].includes(stored)
+    let stored: string | null = null;
+    try {
+      stored = typeof window !== 'undefined' ? localStorage.getItem(LS_KEY('active')) : null;
+    } catch {
+      // Storage blocked (privacy mode / SecurityError): start in demo mode.
+    }
+    // 'backend' is not restored: as a provider of its own it has no visitor key,
+    // so every call would 401. Visitors reach the backend by choosing a cloud
+    // provider and adding their key.
+    return stored && ['claude', 'gemini', 'lmstudio', 'llamacpp', 'openai', 'openrouter', 'mock'].includes(stored)
       ? (stored as ProviderId)
       : DEFAULT_PROVIDER;
   });
@@ -225,14 +236,14 @@ export function LLMProviderWrapper({ children }: { children: ReactNode }) {
     [activeProviderId, config]
   );
 
-  const isConfigured = provider.isConfigured();
+  const providerConfigured = provider.isConfigured();
 
   // When backend mode is on, route all AI calls through FastAPI (no keys in browser)
   const backendBaseUrl = config.backend.baseUrl || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
   // Determine which cloud provider + key + model to forward to the backend proxy.
   // If the user selected a non-proxiable provider (local, mock) fall back to gemini.
-  const backendProvider = useMemo(() => {
+  const { backendProvider, activeIsCloud, cloudKeyComplete } = useMemo(() => {
     const PROXY_PROVIDERS = ['claude', 'gemini', 'openai', 'openrouter'] as const;
     type ProxyProvider = (typeof PROXY_PROVIDERS)[number];
     const proxyProvider: ProxyProvider = PROXY_PROVIDERS.includes(activeProviderId as ProxyProvider)
@@ -260,7 +271,15 @@ export function LLMProviderWrapper({ children }: { children: ReactNode }) {
         break;
     }
     const backendApiKey = import.meta.env.VITE_BACKEND_API_KEY || '';
-    return createBackendProvider(backendBaseUrl, userApiKey, proxyProvider, proxyModel, backendApiKey);
+    return {
+      backendProvider: createBackendProvider(backendBaseUrl, userApiKey, proxyProvider, proxyModel, backendApiKey),
+      // Only a cloud provider the visitor actually chose can go live -- demo (mock)
+      // and local providers never use a stale cloud key.
+      activeIsCloud: PROXY_PROVIDERS.includes(activeProviderId as ProxyProvider),
+      // ...and only with a complete-looking key: '', a build-time placeholder
+      // ('your_claude_key_here') or a half-typed key would only earn a 401.
+      cloudKeyComplete: looksLikeCompleteKey(userApiKey),
+    };
   }, [backendBaseUrl, activeProviderId, config]);
 
   // Health check the backend once per baseUrl change. If unreachable, fall back to the
@@ -300,12 +319,21 @@ export function LLMProviderWrapper({ children }: { children: ReactNode }) {
 
   // Auto-fallback to mock if provider isn't configured
   const effectiveProvider = useMemo(() => {
-    if (useBackend && backendReachable) return backendProvider;
-    if (!isConfigured && activeProviderId !== 'mock') {
+    // A cloud provider without a complete key is demo mode, through the backend
+    // or direct: never send '', a placeholder or a half-typed key upstream.
+    if (activeIsCloud && !cloudKeyComplete) return createMockProvider();
+    if (useBackend && backendReachable && activeIsCloud) return backendProvider;
+    // The bare backend provider never carries a visitor key -> always a 401.
+    if (activeProviderId === 'backend') return createMockProvider();
+    if (!providerConfigured && activeProviderId !== 'mock') {
       return createMockProvider();
     }
     return provider;
-  }, [provider, isConfigured, activeProviderId, useBackend, backendReachable, backendProvider]);
+  }, [provider, providerConfigured, activeProviderId, useBackend, backendReachable, backendProvider, activeIsCloud, cloudKeyComplete]);
+
+  // What Settings shows as "configured": a cloud provider only with a complete
+  // key (the same rule that decides live vs demo above), else the provider's own check.
+  const isConfigured = activeIsCloud ? cloudKeyComplete : providerConfigured;
 
   // Sync the active provider into ai.ts so all AI calls use the context provider
   useEffect(() => {
